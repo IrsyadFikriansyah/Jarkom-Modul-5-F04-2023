@@ -1,0 +1,12 @@
+options {
+        directory "/var/cache/bind";
+
+        forwarders {
+             192.168.122.1;
+        };
+
+        // dnssec-validation auto;
+        allow-query{any;};
+
+        listen-on-v6 { any; };
+};

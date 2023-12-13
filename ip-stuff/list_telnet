@@ -1,0 +1,45 @@
+Router:
+------
+Aura
+telnet 172.16.32.128 5041
+
+Heiter
+telnet 172.16.32.128 5063
+
+Frieren
+telnet 172.16.32.128 5059
+
+Himmel
+telnet 172.16.32.128 5057
+
+Fern
+telnet 172.16.32.128 5002
+
+
+Server:
+------
+Sein
+telnet 172.16.32.128 5046
+
+Stark
+telnet 172.16.32.128 5055
+
+Richter
+telnet 172.16.32.128 5044
+
+Revolte
+telnet 172.16.32.128 5061
+
+Client:
+------
+GrobeForest
+telnet 172.16.32.128 5048
+
+LaubHills
+telnet 172.16.32.128 5037
+
+SchwerMountain
+telnet 172.16.32.128 5039
+
+TurkRegion
+telnet 172.16.32.128 5050
