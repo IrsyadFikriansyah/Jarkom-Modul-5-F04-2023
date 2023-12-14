@@ -208,11 +208,6 @@ route add -net 192.223.14.136 netmask 255.255.255.252 gw 192.223.14.142
 route add -net 192.223.14.144 netmask 255.255.255.252 gw 192.223.14.142
 ```
 
-* Heiter
-```sh
-# 
-```
-
 * Frieren
 ```sh
 # kiri
@@ -229,7 +224,5 @@ route add -net 192.223.14.128 netmask 255.255.255.252 gw 192.223.14.2
 route add -net 192.223.14.132 netmask 255.255.255.252 gw 192.223.14.2
 ```
 
-* Fern
-```sh
-```
-
+# Pengerjaan Soal
+## No.1
