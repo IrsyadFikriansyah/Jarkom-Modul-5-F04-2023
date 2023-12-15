@@ -477,9 +477,9 @@ penjelasan:
 ```sh
 iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 ```
-* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
 * `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
-* `--dport 8080`: Menentukan port tujuan (destination port) yang diizinkan, yaitu port 8080.
+* `--dport 8080`: Membatasi aturan untuk paket yang menuju ke port 8080.
 * `-j ACCEPT`: Paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
 
 ```sh
@@ -508,7 +508,7 @@ iptables -A INPUT -p icmp -m connlimit --connlimit-above 3 --connlimit-mask 0 -j
 
 penjelasan:
 * `iptables:` Perintah untuk mengonfigurasi tabel filter pada iptables.
-* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
 * `-p icmp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, ICMP. Ini akan mempengaruhi paket-paket kontrol jaringan seperti ping.
 * `-m connlimit`: Menggunakan modul connlimit, yang memungkinkan Anda untuk mengenakan pembatasan koneksi pada aturan tertentu.
 * `--connlimit-above 3`: Menetapkan batas atas koneksi yang diizinkan. Aturan ini akan memblokir paket ICMP jika jumlah koneksi ICMP dari satu sumber melebihi 3.
@@ -528,12 +528,12 @@ iptables -A INPUT -p tcp --dport 22 -s 192.223.8.0/22 -j ACCEPT
 ```
 
 penjelasan:
-* `iptables`: Perintah untuk mengonfigurasi tabel filter pada iptables.
-* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
 * `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
-* `--dport 22`: Menentukan port tujuan (destination port) yang diizinkan, dalam hal ini, port 22 yang umumnya digunakan untuk layanan SSH.
+* `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
 * `-s 192.223.8.0/22`: Menetapkan batasan sumber IP, yaitu subnet A10 (`GrobeForest`)
 * `-j ACCEPT`: Paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
+
 
 ### No.5
 
@@ -545,16 +545,30 @@ Di WebServer (`Stark`) jalankan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 22 -m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri -s 192.223.8.0/22 -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j DROP
 ```
 
 penjelasan:
-* `iptables`: Perintah untuk mengonfigurasi tabel filter pada iptables.
-* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri -s 192.223.8.0/22 -j ACCEPT
+```
+
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
 * `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
-* `--dport 22`: Menentukan port tujuan (destination port) yang diizinkan, dalam hal ini, port 22 yang umumnya digunakan untuk layanan SSH.
+* `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
 * `-m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri`: Menggunakan modul waktu untuk menetapkan batasan waktu ketika aturan tersebut berlaku. Dengan konfigurasi ini, aturan hanya berlaku pada hari Senin hingga Jumat, mulai dari pukul 08:00 hingga 16:00.
 * `-s 192.223.8.0/22`: Menetapkan batasan sumber IP, yaitu subnet A10 (`GrobeForest`)
 * `-j ACCEPT`: Paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -j DROP
+```
+
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
+* `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
+* `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
+* `-j DROP`: Menetapkan tindakan yang harus diambil jika paket sesuai dengan aturan ini, yaitu menolak (DROP).
 
 
 ### No.6
@@ -562,6 +576,35 @@ penjelasan:
 > Lalu, karena ternyata terdapat beberapa waktu di mana network administrator dari WebServer tidak bisa stand by, sehingga perlu ditambahkan rule bahwa akses pada hari Senin - Kamis pada jam 12.00 - 13.00 dilarang (istirahat maksi cuy) dan akses di hari Jumat pada jam 11.00 - 13.00 juga dilarang (maklum, Jumatan rek).
 
 <hr style="width:60%; align:center">
+
+Di WebServer (`Stark`) jalankan:
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j DROP
+iptables -A INPUT -p tcp --dport 22 -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j DROP
+```
+
+Penjelasan:
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j DROP
+```
+
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
+* `-p tcp`: Menetapkan protokol TCP.
+* `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
+* `-m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu`: Menggunakan modul waktu untuk membatasi aturan hanya berlaku pada waktu tertentu dan pada hari Senin hingga Kamis, mulai dari pukul 12:00 hingga 13:00.
+* `-j DROP`: Menetapkan tindakan yang harus diambil jika paket sesuai dengan aturan ini, yaitu menolak (DROP).
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j DROP
+```
+
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
+* `-p tcp`: Menetapkan protokol TCP.
+* `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
+* `-m time --timestart 11:00 --timestop 13:00 --weekdays Fri`: Menggunakan modul waktu untuk membatasi aturan hanya berlaku pada waktu tertentu dan pada hari Jumat, mulai dari pukul 11:00 hingga 13:00.
+* `-j DROP`: Menetapkan tindakan yang harus diambil jika paket sesuai dengan aturan ini, yaitu menolak (DROP).
 
 
 ### No.7
