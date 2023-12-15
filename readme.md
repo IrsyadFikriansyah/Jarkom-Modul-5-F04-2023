@@ -11,7 +11,7 @@
 
 ## Table of Contents
 - [Topologi](#Topologi)
-- [Jawaban](#No.1)
+- [Jawaban](###No.1)
 
 ## Topologi
 
@@ -427,16 +427,15 @@ route add -net 192.223.14.132 netmask 255.255.255.252 gw 192.223.14.2
 
 ## Pengerjaan Soal
 
-### No.1
+* ### No.1
 
 > Agar topologi yang kalian buat dapat mengakses keluar, kalian diminta untuk mengkonfigurasi Aura menggunakan iptables, tetapi tidak ingin menggunakan MASQUERADE.
 
 <hr style="width:60%; align:center">
 
-Pada `/root/.bashrc` di `Aura` tambahkan:
+Di `Aura` jalankan:
 
 ```sh
-...
 IPETH0="$(ip -br a | grep eth0 | awk '{print $NF}' | cut -d'/' -f1)"
 iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$IPETH0"
 ```
@@ -444,11 +443,11 @@ penjelasan:
 ```sh
 IPETH0="$(ip -br a | grep eth0 | awk '{print $NF}' | cut -d'/' -f1)"
 ```
-* `ip -br a` menampilkan versi singkat dari `ip a`.
-* `grep eth0` menampilkan output yang memiliki `eth0` pada stringnya.
-* `awk '{print $NF}'` menampilkan kolom terakhir dari baris yang dipilih.
-* `cut -d'/' -f1` menghapus string mulai dari char `/`.
-* hasil dimasukkan kedalam variabel `IPETH0`
+* `ip -br a`: Menampilkan versi singkat dari `ip a`.
+* `grep eth0`: Menampilkan output yang memiliki `eth0` pada stringnya.
+* `awk '{print $NF}'`: Menampilkan kolom terakhir dari baris yang dipilih.
+* `cut -d'/' -f1`: Menghapus string mulai dari char `/`.
+* `IPETH0`: Variabel yang menyimpan hasilnya.
 
 ```sh
 iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$IPETH0"
@@ -459,7 +458,7 @@ iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$I
 * `-o eth0`: Menentukan antarmuka keluar, yaitu "eth0".
 * `-j SNAT`: Menunjukkan bahwa tindakan yang diambil adalah Source NAT (SNAT), yaitu mengganti alamat sumber paket.
 * `-s 192.223.0.0/20`: Mmenentukan jangkauan source IP yaitu `192.223.0.0/20`
-* `--to-source "$IPETH0"`: Ini menentukan alamat IP yang akan digunakan sebagai alamat sumber setelah paket melalui aturan SNAT. Nilai ini diambil dari variabel `IPETH0` yang telah diisi sebelumnya.
+* `--to-source "$IPETH0"`: Menentukan alamat IP yang akan digunakan sebagai alamat sumber setelah paket melalui aturan SNAT. Nilai ini diambil dari variabel `IPETH0` yang telah diisi sebelumnya.
 
 ### No.2
 
@@ -467,7 +466,7 @@ iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$I
 
 <hr style="width:60%; align:center">
 
-Pada `/root/.bashrc` di `LaubHills` tambahkan:
+Di `LaubHills` jalankan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
@@ -480,8 +479,8 @@ iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 ```
 * `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
 * `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
-* `--dport 8080`: Menentukan port tujuan (destination port) yang diizinkan, dalam hal ini, port 8080.
-* `-j ACCEPT`: Menunjukkan bahwa paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
+* `--dport 8080`: Menentukan port tujuan (destination port) yang diizinkan, yaitu port 8080.
+* `-j ACCEPT`: Paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
 
 ```sh
 iptables -A INPUT -p tcp -j DROP
@@ -501,7 +500,7 @@ iptables -A INPUT -p udp -j DROP
 
 <hr style="width:60%; align:center">
 
-Pada `/root/.bashrc` di DHCP (`Revolt`) dan DNS (`Richter`) tambahkan:
+Di DHCP (`Revolt`) dan DNS (`Richter`) jalankan:
 
 ```sh
 iptables -A INPUT -p icmp -m connlimit --connlimit-above 3 --connlimit-mask 0 -j DROP
@@ -522,12 +521,40 @@ penjelasan:
 
 <hr style="width:60%; align:center">
 
+Di WebServer (`Stark`) jalankan:
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -s 192.223.8.0/22 -j ACCEPT
+```
+
+penjelasan:
+* `iptables`: Perintah untuk mengonfigurasi tabel filter pada iptables.
+* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+* `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
+* `--dport 22`: Menentukan port tujuan (destination port) yang diizinkan, dalam hal ini, port 22 yang umumnya digunakan untuk layanan SSH.
+* `-s 192.223.8.0/22`: Menetapkan batasan sumber IP, yaitu subnet A10 (`GrobeForest`)
+* `-j ACCEPT`: Paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
 
 ### No.5
 
 > Selain itu, akses menuju WebServer hanya diperbolehkan saat jam kerja yaitu Senin-Jumat pada pukul 08.00-16.00.
 
 <hr style="width:60%; align:center">
+
+Di WebServer (`Stark`) jalankan:
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri -s 192.223.8.0/22 -j ACCEPT
+```
+
+penjelasan:
+* `iptables`: Perintah untuk mengonfigurasi tabel filter pada iptables.
+* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+* `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
+* `--dport 22`: Menentukan port tujuan (destination port) yang diizinkan, dalam hal ini, port 22 yang umumnya digunakan untuk layanan SSH.
+* `-m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri`: Menggunakan modul waktu untuk menetapkan batasan waktu ketika aturan tersebut berlaku. Dengan konfigurasi ini, aturan hanya berlaku pada hari Senin hingga Jumat, mulai dari pukul 08:00 hingga 16:00.
+* `-s 192.223.8.0/22`: Menetapkan batasan sumber IP, yaitu subnet A10 (`GrobeForest`)
+* `-j ACCEPT`: Paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
 
 
 ### No.6
