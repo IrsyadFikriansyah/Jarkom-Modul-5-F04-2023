@@ -319,7 +319,7 @@ route add -net 192.223.14.132 netmask 255.255.255.252 gw 192.223.14.2
 
 ### Konfigurasi DHCP
 
-Pada Relay (`Aura`, `Fern`, `Frieren`, `Heiter`, `Himmel`)
+#### Pada Relay (`Aura`, `Fern`, `Frieren`, `Heiter`, `Himmel`)
 
 1. install `isc-dhcp-relay`
 2. konfigurasi `/etc/default/isc-dhcp-relay`
@@ -337,7 +337,7 @@ Pada Relay (`Aura`, `Fern`, `Frieren`, `Heiter`, `Himmel`)
     net.ipv4.ip_forward=1
     ```
 
-Pada Server (`Revolte`)
+#### Pada Server (`Revolte`)
 
 1. install `isc-dhcp-server`
 2. konfigurasi `/etc/default/isc-dhcp-server`
@@ -433,7 +433,7 @@ Pada Server (`Revolte`)
 
 <hr style="width:60%; align:center">
 
-1. pada `/root/.bashrc` di `Aura` tambahkan
+Pada `/root/.bashrc` di `Aura` tambahkan:
 
 ```sh
 ...
@@ -467,6 +467,33 @@ iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$I
 
 <hr style="width:60%; align:center">
 
+Pada `/root/.bashrc` di `LaubHills` tambahkan:
+
+```sh
+iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+iptables -A INPUT -p tcp -j DROP
+iptables -A INPUT -p udp -j DROP
+```
+penjelasan:
+```sh
+iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
+```
+* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+* `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
+* `--dport 8080`: Menentukan port tujuan (destination port) yang diizinkan, dalam hal ini, port 8080.
+* `-j ACCEPT`: Menunjukkan bahwa paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
+
+```sh
+iptables -A INPUT -p tcp -j DROP
+```
+* `-p tcp`: Menentukan bahwa aturan ini berlaku untuk paket dengan protokol TCP.
+* `-j DROP`: Paket yang sesuai dengan aturan ini harus ditolak (DROP). Dengan kata lain, aturan ini secara efektif menolak semua paket TCP yang mencapai sistem, kecuali jika ada aturan yang lebih awal yang mengizinkan (ACCEPT) paket tersebut.
+
+```sh
+iptables -A INPUT -p udp -j DROP
+```
+* `-p udp`: Menentukan bahwa aturan ini berlaku untuk paket dengan protokol UDP.
+* `-j DROP`: Paket yang sesuai dengan aturan ini harus ditolak (DROP). Dengan kata lain, aturan ini secara efektif menolak semua paket UDP yang mencapai sistem, kecuali jika ada aturan yang lebih awal yang mengizinkan (ACCEPT) paket tersebut.
 
 ### No.3
 
@@ -474,6 +501,20 @@ iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$I
 
 <hr style="width:60%; align:center">
 
+Pada `/root/.bashrc` di DHCP (`Revolt`) dan DNS (`Richter`) tambahkan:
+
+```sh
+iptables -A INPUT -p icmp -m connlimit --connlimit-above 3 --connlimit-mask 0 -j DROP
+```
+
+penjelasan:
+* `iptables:` Perintah untuk mengonfigurasi tabel filter pada iptables.
+* `-A INPUT`: Menambahkan aturan ke rantai INPUT, yang digunakan untuk mengatur paket yang masuk ke sistem.
+* `-p icmp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, ICMP. Ini akan mempengaruhi paket-paket kontrol jaringan seperti ping.
+* `-m connlimit`: Menggunakan modul connlimit, yang memungkinkan Anda untuk mengenakan pembatasan koneksi pada aturan tertentu.
+* `--connlimit-above 3`: Menetapkan batas atas koneksi yang diizinkan. Aturan ini akan memblokir paket ICMP jika jumlah koneksi ICMP dari satu sumber melebihi 3.
+* `--connlimit-mask 0`: Mengatur pembatasan koneksi berdasarkan alamat IP tunggal, mengabaikan subnet. Nilai 0 di sini mengindikasikan bahwa seluruh alamat IP harus dihitung bersama-sama, tidak memandang perbedaan subnet.
+* `-j DROP`: Ini menunjukkan bahwa paket yang sesuai dengan aturan ini harus ditolak (DROP).
 
 ### No.4
 
