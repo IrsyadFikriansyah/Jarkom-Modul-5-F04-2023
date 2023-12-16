@@ -427,7 +427,7 @@ route add -net 192.223.14.132 netmask 255.255.255.252 gw 192.223.14.2
 
 ## Pengerjaan Soal
 
-* ### No.1
+### No.1
 
 > Agar topologi yang kalian buat dapat mengakses keluar, kalian diminta untuk mengkonfigurasi Aura menggunakan iptables, tetapi tidak ingin menggunakan MASQUERADE.
 
@@ -521,7 +521,7 @@ penjelasan:
 
 <hr style="width:60%; align:center">
 
-Di WebServer (`Stark`) jalankan:
+Di WebServer (`Stark` dan `Sein`) jalankan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 22 -s 192.223.8.0/22 -j ACCEPT
@@ -541,7 +541,7 @@ penjelasan:
 
 <hr style="width:60%; align:center">
 
-Di WebServer (`Stark`) jalankan:
+Di WebServer (`Stark` dan `Sein`) jalankan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 22 -m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri -s 192.223.8.0/22 -j ACCEPT
@@ -577,7 +577,7 @@ iptables -A INPUT -p tcp --dport 22 -j DROP
 
 <hr style="width:60%; align:center">
 
-Di WebServer (`Stark`) jalankan:
+Di WebServer (`Stark` dan `Sein`) jalankan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 22 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j DROP
@@ -620,6 +620,19 @@ iptables -A INPUT -p tcp --dport 22 -m time --timestart 11:00 --timestop 13:00 -
 
 <hr style="width:60%; align:center">
 
+Di WebServer (`Stark` dan `Sein`) jalankan:
+
+```sh
+iptables -A INPUT -p tcp --dport 80 -s 192.223.14.128/30 -m time --datestart 2023-12-10 --datestop 2024-02-15 -j DROP
+```
+
+Penjelasan:
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
+* `-p tcp`: Menetapkan protokol TCP.
+* `--dport 80`: Membatasi aturan untuk paket yang menuju ke port 80 (port HTTP).
+* `-s 192.223.14.128/30`: Menentukan alamat sumber (source).
+* `-m time --datestart 2023-12-10 --datestop 2024-02-15`: Menentukan aturan berdasarkan waktu. Aturan ini hanya berlaku untuk paket-paket yang diterima antara tanggal 10 Desember 2023 dan 15 Februari 2024.
+* `-j DROP`: Menetapkan tindakan yang harus diambil jika paket sesuai dengan aturan ini, yaitu menolak (DROP).
 
 ### No.9
 
@@ -627,6 +640,47 @@ iptables -A INPUT -p tcp --dport 22 -m time --timestart 11:00 --timestop 13:00 -
 > (clue: test dengan nmap)
 
 <hr style="width:60%; align:center">
+
+Di WebServer (`Stark` dan `Sein`) jalankan:
+
+```sh
+iptables -N scan_port
+iptables -A INPUT -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
+iptables -A FORWARD -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
+iptables -A INPUT -m recent --name scan_port --set -j ACCEPT
+iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
+```
+
+```sh
+iptables -N scan_port
+```
+Penjelasan:
+* Membuat chain baru dengan nama "scan_port". Chain ini akan digunakan untuk mengelola aturan-aturan terkait perlindungan terhadap pemindaian port.
+
+```sh
+iptables -A INPUT -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
+```
+Penjelasan:
+* Menambahkan aturan pada chain INPUT. Aturan ini menggunakan modul "recent" untuk melacak aktivitas baru-baru ini. 
+* Jika ada lebih dari 20 paket yang masuk dalam waktu 600 detik (10 menit), maka paket-paket tersebut akan ditolak (DROP).
+
+```sh
+iptables -A FORWARD -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
+```
+Penjelasan:
+* Menambahkan aturan yang sama pada chain FORWARD.
+
+```sh
+iptables -A INPUT -m recent --name scan_port --set -j ACCEPT
+```
+Penjelasan:
+* Menambahkan aturan pada chain INPUT. Aturan ini mengatur kondisi yang memungkinkan paket-paket masuk untuk diizinkan (ACCEPT) dan menyetel pelacakan "recent" ke status "set". Ini berarti setiap kali paket masuk, sistem akan mencatatnya sebagai aktivitas baru.
+
+```sh
+iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
+```
+Penjelasan:
+* Menambahkan aturan pada chain FORWARD. Serupa dengan aturan sebelumnya, aturan ini mengizinkan paket-paket yang melewati sistem dan menyetel pelacakan "recent" ke status "set".
 
 
 ### No.10
