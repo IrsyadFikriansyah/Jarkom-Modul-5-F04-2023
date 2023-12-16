@@ -651,35 +651,37 @@ iptables -A INPUT -m recent --name scan_port --set -j ACCEPT
 iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
 ```
 
+Penjelasan:
+
 ```sh
 iptables -N scan_port
 ```
-Penjelasan:
+
 * Membuat chain baru dengan nama "scan_port". Chain ini akan digunakan untuk mengelola aturan-aturan terkait perlindungan terhadap pemindaian port.
 
 ```sh
 iptables -A INPUT -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
 ```
-Penjelasan:
+
 * Menambahkan aturan pada chain INPUT. Aturan ini menggunakan modul "recent" untuk melacak aktivitas baru-baru ini. 
 * Jika ada lebih dari 20 paket yang masuk dalam waktu 600 detik (10 menit), maka paket-paket tersebut akan ditolak (DROP).
 
 ```sh
 iptables -A FORWARD -m recent --name scan_port --update --seconds 600 --hitcount 20 -j DROP
 ```
-Penjelasan:
+
 * Menambahkan aturan yang sama pada chain FORWARD.
 
 ```sh
 iptables -A INPUT -m recent --name scan_port --set -j ACCEPT
 ```
-Penjelasan:
+
 * Menambahkan aturan pada chain INPUT. Aturan ini mengatur kondisi yang memungkinkan paket-paket masuk untuk diizinkan (ACCEPT) dan menyetel pelacakan "recent" ke status "set". Ini berarti setiap kali paket masuk, sistem akan mencatatnya sebagai aktivitas baru.
 
 ```sh
 iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
 ```
-Penjelasan:
+
 * Menambahkan aturan pada chain FORWARD. Serupa dengan aturan sebelumnya, aturan ini mengizinkan paket-paket yang melewati sistem dan menyetel pelacakan "recent" ke status "set".
 
 
