@@ -460,13 +460,22 @@ iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$I
 * `-s 192.223.0.0/20`: Mmenentukan jangkauan source IP yaitu `192.223.0.0/20`
 * `--to-source "$IPETH0"`: Menentukan alamat IP yang akan digunakan sebagai alamat sumber setelah paket melalui aturan SNAT. Nilai ini diambil dari variabel `IPETH0` yang telah diisi sebelumnya.
 
+#### Testing :
+Jalankan command diatas pada `Aura`, cek dengan menggunakan command `iptables -t nat -L -n -v`
+
+![1a](images/1a.png)
+
+Setelah itu, coba jalankan command `ping google.com` untuk memeriksa apakah node tersebut sudah tehubung dengan internet atau belum. Disini kami memeriksa pada node `SchwerMountain`
+
+![1b](images/1b.png)
+
 ### No.2
 
 > Kalian diminta untuk melakukan drop semua TCP dan UDP kecuali port 8080 pada TCP.
 
 <hr style="width:60%; align:center">
 
-Di `LaubHills` jalankan:
+Di `SchwerMountain` jalankan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
@@ -493,6 +502,39 @@ iptables -A INPUT -p udp -j DROP
 ```
 * `-p udp`: Menentukan bahwa aturan ini berlaku untuk paket dengan protokol UDP.
 * `-j DROP`: Paket yang sesuai dengan aturan ini harus ditolak (DROP). Dengan kata lain, aturan ini secara efektif menolak semua paket UDP yang mencapai sistem, kecuali jika ada aturan yang lebih awal yang mengizinkan (ACCEPT) paket tersebut.
+
+#### Testing :
+Jalankan command diatas pada `SchwerMountain`, cek dengan menggunakan command `iptables -L`
+
+![2a](images/2a.png)
+
+Kita dapat melihat efek dari command tersebut dengan menggunakan `netcat`
+
+- Jalankan perintah `nc -l -p 8080` untuk melakukan listen pada TCP dengan port 8080
+- Lalu gunakan node lain untuk mengirim pesan dengan netcat juga. Jalankan perintah `nc [ip-SchwerMountain] 8080` untuk terhubung dengan `SchwerMountain`. Karena ip dari `SchwerMountain` bersifat dinamis, maka perlu dicek dulu ip-nya
+
+Hasil :
+
+`LaubHills`
+
+![2b](images/2b.png)
+
+`SchwerMountain`
+
+![2c](images/2c.png)
+
+- Jalankan perintah `nc -u -l -p 8080` untuk melakukan listen pada UDP dengan port 8080
+- Lalu gunakan node lain untuk mengirim pesan dengan netcat juga. Jalankan perintah `nc -u [ip-SchwerMountain] 8080` untuk terhubung dengan `SchwerMountain`. Karena ip dari `SchwerMountain` bersifat dinamis, maka perlu dicek dulu ip-nya
+
+Hasil :
+
+`LaubHills`
+
+![2b](images/2d.png)
+
+`SchwerMountain`
+
+![2c](images/2e.png)
 
 ### No.3
 
@@ -533,6 +575,15 @@ penjelasan:
 * `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
 * `-s 192.223.8.0/22`: Menetapkan batasan sumber IP, yaitu subnet A10 (`GrobeForest`)
 * `-j ACCEPT`: Paket yang sesuai dengan aturan ini harus diterima (ACCEPT).
+* 
+Selain itu, kita juga perlu DROP koneksi SSH yang lain. Maka setelah melakukan perintah tersebut, jalankan:
+
+```sh
+iptables -A INPUT -p tcp --dport 22 -j DROP
+```
+
+penjelasan:
+* `-j DROP` : Paket yang sesua dengan aturan akan ditolak (DROP).
 
 
 ### No.5
