@@ -508,31 +508,33 @@ Jalankan command diatas pada `SchwerMountain`, cek dengan menggunakan command `i
 
 ![2a](images/2a.png)
 
-Kita dapat melihat efek dari command tersebut dengan menggunakan `netcat`
+Kita dapat melihat efek dari command tersebut dengan menggunakan `netcat`. Pertama akan dites untuk protokol TCP.
 
 - Jalankan perintah `nc -l -p 8080` untuk melakukan listen pada TCP dengan port 8080
 - Lalu gunakan node lain untuk mengirim pesan dengan netcat juga. Jalankan perintah `nc [ip-SchwerMountain] 8080` untuk terhubung dengan `SchwerMountain`. Karena ip dari `SchwerMountain` bersifat dinamis, maka perlu dicek dulu ip-nya
 
 Hasil :
 
-`LaubHills`
+`LaubHills` sebagai node yang mengirim pesan ke port `8080`
 
 ![2b](images/2b.png)
 
-`SchwerMountain`
+`SchwerMountain` sebagai node yang melakuan listen pada port `8080`
 
 ![2c](images/2c.png)
+
+Setelah itu, akan dites juga untuk protokol UDP
 
 - Jalankan perintah `nc -u -l -p 8080` untuk melakukan listen pada UDP dengan port 8080
 - Lalu gunakan node lain untuk mengirim pesan dengan netcat juga. Jalankan perintah `nc -u [ip-SchwerMountain] 8080` untuk terhubung dengan `SchwerMountain`. Karena ip dari `SchwerMountain` bersifat dinamis, maka perlu dicek dulu ip-nya
 
 Hasil :
 
-`LaubHills`
+`LaubHills` sebagai node yang mengirim pesan ke port `8080`
 
 ![2b](images/2d.png)
 
-`SchwerMountain`
+`SchwerMountain` sebagai node yang melakukan liten pda port '8080'
 
 ![2c](images/2e.png)
 
@@ -614,6 +616,34 @@ iptables -A INPUT -p tcp --dport 22 -j DROP
 penjelasan:
 * `-j DROP` : Paket yang sesua dengan aturan akan ditolak (DROP).
 
+#### Testing :
+Jalankan command diatas pada kedua web server yaitu `Stark` dan `Sein`, cek dengan menggunakan command `iptables -L`
+
+Pada node `Stark`
+
+![4a](images/4a.png)
+
+Pada node `Sein`
+
+![4b](images/4b.png)
+
+Untuk memeriksa, kita dapat menggunakan `netcat` untuk mengakses port `22` di salah satu web server. Pada testing kali ini kita akan menggunakan web server `Sein`. Pertama-tama, lakukan listen ke port `22` pada web server `Sein` dengan menggunakan perintah `nc -l -p 22`
+
+Lalu pada `GrobeForest`, gunakan perintah `nc 192.223.8.2 22` untuk mengirim data ke `Sein` menggunakan port `22`.
+
+![4c](images/4c.png)
+
+Hasil:
+
+![4d](images/4d.png)
+
+Apabila menggunakan client lain seperti `LaubHills`, paket yang diterima akan didrop. Hasilnya data yang dikirim melalui netcat tidak akan sampai ke web server `Sein`
+
+![4e](images/4e.png)
+
+Hasil:
+
+![4f](images/4f.png)
 
 ### No.5
 
@@ -650,6 +680,34 @@ iptables -A INPUT -p tcp --dport 22 -j DROP
 * `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
 * `-j DROP`: Menetapkan tindakan yang harus diambil jika paket sesuai dengan aturan ini, yaitu menolak (DROP).
 
+#### Testing :
+Jalankan command diatas pada kedua web server yaitu `Stark` dan `Sein`, cek dengan menggunakan command `iptables -L`
+
+Pada node `Stark`
+
+![5a](images/5a.png)
+
+Pada node `Sein`
+
+![5b](images/5b.png)
+
+Untuk memeriksa, kita dapat menggunakan `netcat`. Kita dapat mengganti waktu dari server dan client yang mengakses dengan menggunakan perintah `date MMDDhhmmYYYY` untuk mennganti waktu sesuai formatnya. Misalkan perintah yang digunakan adalah `date 101010002023` artinya waktunya akan berubah menjadi 10 Oktober 2023 pukul 10:00. Karena yang dibatasi adalahh port `22`, maka saat menjalankan `netcat` juga menggunakan port `22`. Web server yang digunakan adalah `Sein`
+
+Pertama coba untuk skenario dimana waktunya cocok dengan syaratnya. Sebelum menjalankan perintah `netcat`, ganti waktunya menjadi 20 Desember 2023 pukul 12:00.
+
+![5c](images/5c.png)
+
+Hasil:
+
+![5d](images/5d.png)
+
+Setelah itu dicoba untuk skenario dimana waktunya tidak cocok. Ganti waktunya menjadi 20 Desember 2023 pukul 17:00
+
+![5e](images/5e.png)
+
+Hasil:
+
+![5f](images/5f.png)
 
 ### No.6
 
