@@ -557,6 +557,35 @@ penjelasan:
 * `--connlimit-mask 0`: Mengatur pembatasan koneksi berdasarkan alamat IP tunggal, mengabaikan subnet. Nilai 0 di sini mengindikasikan bahwa seluruh alamat IP harus dihitung bersama-sama, tidak memandang perbedaan subnet.
 * `-j DROP`: Ini menunjukkan bahwa paket yang sesuai dengan aturan ini harus ditolak (DROP).
 
+#### Testing : 
+Jalankan command diatas pada DHCP dan DNS Server yaitu `Revolte` dan `Richter`, cek dengan menggunakan command `iptables -L`
+
+`Revolte`
+
+![3a](images/3a.png)
+
+`Richter`
+
+![3b](images/3b.png)
+
+Untuk memeriksa apakah sudah benar, dapat dilakukan dengan melakukan ping dari 4 host sekaligus. Apabila dilakukan ping pada host keempat, maka seharusnya akan mengalami packet loss. Pada testing kali ini, ping yang dilakukan adalah ping ke `Richter`
+
+- Ping dari `Sein`
+
+![3c](images/3c.png)
+
+- Ping dari `GrobeForest`
+
+![3d](images/3d.png)
+
+- Ping dari `TurkRegion`
+
+![3e](images/3e.png)
+
+- Ping dari `Stark`
+
+![3f](images/3f.png)
+
 ### No.4
 
 > Lakukan pembatasan sehingga koneksi SSH pada Web Server hanya dapat dilakukan oleh masyarakat yang berada pada GrobeForest.
