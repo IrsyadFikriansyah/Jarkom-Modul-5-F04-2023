@@ -744,6 +744,34 @@ iptables -A INPUT -p tcp --dport 22 -m time --timestart 11:00 --timestop 13:00 -
 * `-m time --timestart 11:00 --timestop 13:00 --weekdays Fri`: Menggunakan modul waktu untuk membatasi aturan hanya berlaku pada waktu tertentu dan pada hari Jumat, mulai dari pukul 11:00 hingga 13:00.
 * `-j DROP`: Menetapkan tindakan yang harus diambil jika paket sesuai dengan aturan ini, yaitu menolak (DROP).
 
+#### Testing :
+Jalankan command diatas pada kedua web server yaitu `Stark` dan `Sein`, cek dengan menggunakan command `iptables -L`
+
+Pada node `Stark`
+
+![5a](images/6a.png)
+
+Pada node `Sein`
+
+![5b](images/6b.png)
+
+Cara testingnya sama seperti no 6, hanya saja kita perlu mengganti waktunya.
+
+Pertama coba untuk skenario dimana paketnya akan sampai. Sebelum menjalankan perintah `netcat`, ganti waktunya menjadi 22 Desember 2023 pukul 15:30.
+
+![6c](images/6c.png)
+
+Hasil:
+
+![6d](images/6d.png)
+
+Setelah itu dicoba untuk skenario dimana paketnya sampai. Ganti waktunya menjadi 22 Desember 2023 pukul 15:00
+
+![6e](images/6e.png)
+
+Hasil:
+
+![6f](images/6f.png)
 
 ### No.7
 
@@ -751,6 +779,54 @@ iptables -A INPUT -p tcp --dport 22 -m time --timestart 11:00 --timestop 13:00 -
 
 <hr style="width:60%; align:center">
 
+Di Router (`Heiter` dan `Frieren`) jalankan:
+
+```sh
+iptables -A PREROUTING -t nat -p tcp --dport 80 -d 192.223.8.2 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 192.223.8.2
+iptables -A PREROUTING -t nat -p tcp --dport 80 -d 192.223.8.2 -j DNAT --to-destination 192.223.14.146
+iptables -A PREROUTING -t nat -p tcp --dport 443 -d 192.223.14.146 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 192.223.14.146
+iptables -A PREROUTING -t nat -p tcp --dport 443 -d 192.223.14.146 -j DNAT --to-destination 192.223.8.2
+```
+
+* `iptables -A PREROUTING -t nat -p tcp --dport 80 -d 192.223.8.2 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 192.223.8.2`: Menambahkan aturan pada chain PREROUTING di tabel nat. Ini berarti aturan ini diterapkan sebelum paket mencapai proses routing. Rinciannya adalah sebagai berikut:
+    * `-p tcp`: Membatasi paket dengan protokol TCP.
+    * `--dport 80`: Membatasi paket dengan port tujuan 80 (HTTP) yang akan diproses.
+    * `-d 192.223.8.2`: Membatasi paket dengan alamat tujuan 192.223.8.2.
+    * -`m statistic --mode nth --every 2 --packet 0`: Menggunakan modul statistik untuk mengatur load balancing. Aturan ini akan memilih setiap paket kedua.
+    * `-j DNAT --to-destination 192.223.8.2`: Melakukan DNAT (Destination Network Address Translation), mengubah alamat tujuan paket menjadi 192.223.8.2.
+
+* `iptables -A PREROUTING -t nat -p tcp --dport 80 -d 192.223.8.2 -j DNAT --to-destination 192.223.14.146`: Menambahkan aturan tambahan pada chain PREROUTING di tabel nat untuk paket HTTP yang tidak sesuai dengan aturan load balancing. Paket ini akan diarahkan ke alamat tujuan 192.223.14.146.
+
+* `iptables -A PREROUTING -t nat -p tcp --dport 443 -d 192.223.14.146 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 192.223.14.146`: Menambahkan aturan pada chain PREROUTING di tabel nat untuk paket HTTPS. Ini mirip dengan aturan pertama, menggunakan load balancing, tetapi khusus untuk paket dengan port tujuan 443.
+
+* `iptables -A PREROUTING -t nat -p tcp --dport 443 -d 192.223.14.146 -j DNAT --to-destination 192.223.8.2`: Menangkap paket HTTPS yang tidak sesuai dengan aturan load balancing dan mengarahkannya ke alamat tujuan 192.223.8.2.
+
+#### Testing :
+Jalankan command diatas pada router `Heiter` dan `Frieren`, cek dengan menggunakan command `iptables -t nat -L PREROUTING`
+
+Pada node `Heiter`
+
+![7a](images/7a.png)
+
+Pada node `Frieren`
+
+![7b](images/7b.png)
+
+Cara testingnya adalah dengan menggunakan `netcat` untuk listen pada salah satu dari web server sebanyak 2 kali. Apabila dilakukan, routing akan mengarahkan ke server yang berbeda yang diakibatkan oleh rule PREROUTING yang telah dijalankan tadi.
+
+Pertama kita set kedua web server untuk listen ke port `80` dan kita akan melakukan netcat sebanyak 2 kali pada client yang sama dan tujuan ip yang sama.
+
+![7c](images/7c.png)
+
+Hasil :
+
+Pada node `Sein`
+
+![7d](images/7d.png)
+
+Pada node `Stark`
+
+![7e](images/7e.png)
 
 ### No.8
 
@@ -828,5 +904,4 @@ iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
 > Karena kepala suku ingin tau paket apa saja yang di-drop, maka di setiap node server dan router ditambahkan logging paket yang di-drop dengan standard syslog level. 
 
 <hr style="width:60%; align:center">
-
 
