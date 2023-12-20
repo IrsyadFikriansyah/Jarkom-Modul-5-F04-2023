@@ -439,7 +439,7 @@ Di `Aura` jalankan:
 IPETH0="$(ip -br a | grep eth0 | awk '{print $NF}' | cut -d'/' -f1)"
 iptables -t nat -A POSTROUTING -o eth0 -j SNAT -s 192.223.0.0/20 --to-source "$IPETH0"
 ```
-penjelasan:
+#### penjelasan:
 ```sh
 IPETH0="$(ip -br a | grep eth0 | awk '{print $NF}' | cut -d'/' -f1)"
 ```
@@ -482,7 +482,7 @@ iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 iptables -A INPUT -p tcp -j DROP
 iptables -A INPUT -p udp -j DROP
 ```
-penjelasan:
+#### penjelasan:
 ```sh
 iptables -A INPUT -p tcp --dport 8080 -j ACCEPT
 ```
@@ -550,7 +550,7 @@ Di DHCP (`Revolt`) dan DNS (`Richter`) jalankan:
 iptables -A INPUT -p icmp -m connlimit --connlimit-above 3 --connlimit-mask 0 -j DROP
 ```
 
-penjelasan:
+#### penjelasan:
 * `iptables:` Perintah untuk mengonfigurasi tabel filter pada iptables.
 * `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
 * `-p icmp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, ICMP. Ini akan mempengaruhi paket-paket kontrol jaringan seperti ping.
@@ -600,7 +600,7 @@ Di WebServer (`Stark` dan `Sein`) jalankan:
 iptables -A INPUT -p tcp --dport 22 -s 192.223.8.0/22 -j ACCEPT
 ```
 
-penjelasan:
+#### penjelasan:
 * `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
 * `-p tcp`: Menentukan protokol untuk aturan tersebut, dalam hal ini, TCP.
 * `--dport 22`: Membatasi aturan untuk paket yang menuju ke port 22 (port SSH).
@@ -613,7 +613,7 @@ Selain itu, kita juga perlu DROP koneksi SSH yang lain. Maka setelah melakukan p
 iptables -A INPUT -p tcp --dport 22 -j DROP
 ```
 
-penjelasan:
+#### penjelasan:
 * `-j DROP` : Paket yang sesua dengan aturan akan ditolak (DROP).
 
 #### Testing :
@@ -658,7 +658,7 @@ iptables -A INPUT -p tcp --dport 22 -m time --timestart 08:00 --timestop 16:00 -
 iptables -A INPUT -p tcp --dport 22 -j DROP
 ```
 
-penjelasan:
+#### penjelasan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 22 -m time --timestart 08:00 --timestop 16:00 --weekdays Mon,Tue,Wed,Thu,Fri -s 192.223.8.0/22 -j ACCEPT
@@ -722,7 +722,7 @@ iptables -A INPUT -p tcp --dport 22 -m time --timestart 12:00 --timestop 13:00 -
 iptables -A INPUT -p tcp --dport 22 -m time --timestart 11:00 --timestop 13:00 --weekdays Fri -j DROP
 ```
 
-Penjelasan:
+#### Penjelasan:
 
 ```sh
 iptables -A INPUT -p tcp --dport 22 -m time --timestart 12:00 --timestop 13:00 --weekdays Mon,Tue,Wed,Thu -j DROP
@@ -749,11 +749,11 @@ Jalankan command diatas pada kedua web server yaitu `Stark` dan `Sein`, cek deng
 
 Pada node `Stark`
 
-![5a](images/6a.png)
+![6a](images/6a.png)
 
 Pada node `Sein`
 
-![5b](images/6b.png)
+![6b](images/6b.png)
 
 Cara testingnya sama seperti no 6, hanya saja kita perlu mengganti waktunya.
 
@@ -765,7 +765,7 @@ Hasil:
 
 ![6d](images/6d.png)
 
-Setelah itu dicoba untuk skenario dimana paketnya sampai. Ganti waktunya menjadi 22 Desember 2023 pukul 15:00
+Setelah itu dicoba untuk skenario dimana paketnya tidak sampai. Ganti waktunya menjadi 22 Desember 2023 pukul 15:00
 
 ![6e](images/6e.png)
 
@@ -787,6 +787,8 @@ iptables -A PREROUTING -t nat -p tcp --dport 80 -d 192.223.8.2 -j DNAT --to-dest
 iptables -A PREROUTING -t nat -p tcp --dport 443 -d 192.223.14.146 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 192.223.14.146
 iptables -A PREROUTING -t nat -p tcp --dport 443 -d 192.223.14.146 -j DNAT --to-destination 192.223.8.2
 ```
+
+#### Penjelasan:
 
 * `iptables -A PREROUTING -t nat -p tcp --dport 80 -d 192.223.8.2 -m statistic --mode nth --every 2 --packet 0 -j DNAT --to-destination 192.223.8.2`: Menambahkan aturan pada chain PREROUTING di tabel nat. Ini berarti aturan ini diterapkan sebelum paket mencapai proses routing. Rinciannya adalah sebagai berikut:
     * `-p tcp`: Membatasi paket dengan protokol TCP.
@@ -840,13 +842,46 @@ Di WebServer (`Stark` dan `Sein`) jalankan:
 iptables -A INPUT -p tcp --dport 80 -s 192.223.14.128/30 -m time --datestart 2023-12-10 --datestop 2024-02-15 -j DROP
 ```
 
-Penjelasan:
+#### Penjelasan:
+
 * `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
 * `-p tcp`: Menetapkan protokol TCP.
 * `--dport 80`: Membatasi aturan untuk paket yang menuju ke port 80 (port HTTP).
-* `-s 192.223.14.128/30`: Menentukan alamat sumber (source).
+* `-s 192.223.14.128/30`: Menentukan alamat sumber (A1).
 * `-m time --datestart 2023-12-10 --datestop 2024-02-15`: Menentukan aturan berdasarkan waktu. Aturan ini hanya berlaku untuk paket-paket yang diterima antara tanggal 10 Desember 2023 dan 15 Februari 2024.
 * `-j DROP`: Menetapkan tindakan yang harus diambil jika paket sesuai dengan aturan ini, yaitu menolak (DROP).
+
+#### Testing :
+Jalankan command diatas pada kedua web server yaitu `Stark` dan `Sein`, cek dengan menggunakan command `iptables -L`
+
+Pada node `Stark`
+
+![8a](images/8a.jpg)
+
+Pada node `Sein`
+
+![8b](images/8b.jpg)
+
+Cara testingnya kita perlu mengganti waktunya terlebih dahulu.
+
+Pertama coba untuk skenario dimana paketnya akan sampai. Sebelum menjalankan perintah `netcat`, ganti waktunya menjadi 9 Desember 2023
+
+![8c](images/8c.jpg)
+
+Hasil:
+
+![8d](images/8d.jpg)
+![8e](images/8e.jpg)
+
+Setelah itu dicoba untuk skenario dimana paketnya tidak sampai. Ganti waktunya menjadi 11 Desember 2023
+
+![8f](images/8f.jpg)
+
+Hasil:
+
+![8g](images/8g.jpg)
+![8h](images/8h.jpg)
+
 
 ### No.9
 
@@ -865,7 +900,7 @@ iptables -A INPUT -m recent --name scan_port --set -j ACCEPT
 iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
 ```
 
-Penjelasan:
+#### Penjelasan:
 
 ```sh
 iptables -N scan_port
@@ -899,9 +934,44 @@ iptables -A FORWARD -m recent --name scan_port --set -j ACCEPT
 * Menambahkan aturan pada chain FORWARD. Serupa dengan aturan sebelumnya, aturan ini mengizinkan paket-paket yang melewati sistem dan menyetel pelacakan "recent" ke status "set".
 
 
+#### Testing :
+Jalankan command diatas pada kedua web server yaitu `Stark` dan `Sein`, cek dengan menggunakan command `iptables -L`
+
+Pada webserver
+
+![9a](images/9a.jpg)
+
+Cara testingnya, pada client sembarang bisa menggunakan command `nmap -p 1-50 {ip webserver}`
+
+Hasil:
+
+![9b](images/9b.jpg)
+
+Dapat dilihat setelah `Laubhills` melakukan scanning port 1-50, `Laubhills` tidak bisa laku melakukan nmap pada `Sein` karena sudah diblok.
+
 ### No.10
 
 > Karena kepala suku ingin tau paket apa saja yang di-drop, maka di setiap node server dan router ditambahkan logging paket yang di-drop dengan standard syslog level. 
 
 <hr style="width:60%; align:center">
+
+Di setiap Webserver (`Stark` dan `Sein`) dan Router (`Aura`, `Fern`, `Frieren`, `Heiter`, dan `Himmel`) jalankan:
+
+```sh
+iptables -A INPUT -j LOG --log-prefix "Paket yang di-drop: " --log-level 4 -m limit --limit 1/min
+```
+
+#### Penjelasan:
+
+* `-A INPUT`: Menambahkan aturan pada chain INPUT (masukan).
+* `-j LOG`: Mencatat paket kedalam log sistem.
+* `--log-prefix "Paket yang di-drop: "`: Menetapkan awalan untuk pesan log yang akan dicatat dengan "Paket yang di-drop: ".
+* `--log-level 4`: Menetapkan tingkat log. Angka 4 mengindikasikan tingkat "warning". Artinya, pesan log akan memiliki tingkat peringatan.
+* `-m limit --limit 1/min`: Menggunakan modul -m limit yang memberikan pembatasan pada jumlah pesan log yang akan dihasilkan. Dalam hal ini, aturan diberlakukan agar hanya satu pesan log setiap menit yang dihasilkan untuk paket yang cocok dengan aturan ini.
+
+#### Testing :
+
+Jalankan command diatas pada setiap web server dan router, kemudian cek dengan menggunakan command `iptables -L`
+
+![10](images/10.jpg)
 
